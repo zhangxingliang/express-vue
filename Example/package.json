@@ -1,0 +1,25 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "vue ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhangxingliang/VueJs.git"
+  },
+  "keywords": [
+    "vue"
+  ],
+  "author": "zxl",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zhangxingliang/VueJs/issues"
+  },
+  "homepage": "https://github.com/zhangxingliang/VueJs#readme",
+  "dependencies": {
+    "express": "^4.14.0"
+  }
+}

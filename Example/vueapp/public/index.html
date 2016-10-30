@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>vue test</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<script src="/js/vue.js"></script>
+	<!-- 新 Bootstrap 核心 CSS 文件 -->
+	<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+
+	<!-- 可选的Bootstrap主题文件（一般不用引入） -->
+	<link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+
+	<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+	<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+
+	<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+	<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+	<div class="main">
+		<div class="section">
+			<h1>Hello Vue</h1>
+			<div id="app01">
+				{{ message }}
+			</div>
+			<script type="text/javascript">
+				var app = new Vue({
+					el: '#app01',
+					data: {
+						message: 'Hello Vue!'
+					}
+				});
+			</script>
+		</div>
+
+		<div class="section">
+			<h1>v-if|v-model</h1>
+			<div id="app02">
+				<input type="checkbox" v-model="isShow">
+				<span v-if="isShow" >点击checkbox隐藏该提示！</span>
+			</div>
+			<script type="text/javascript">
+				var app = new Vue({
+					el: '#app02',
+					data: {
+						isShow: true
+					}
+				});
+			</script>
+		</div>
+
+		<div class="section">
+			<h1>v-for|v-on</h1>
+			<div id="app03">
+				<input type="text" v-model="newTodo">
+				<button @click="addNewTodo">Add</button>
+				<ol>
+					<li v-for="(todo,index) in todos">
+						{{ todo.text |OrderBy }}
+						<button @click="deleteTodo(index)">X</button>
+					</li>
+				</ol>
+			</div>
+			<script type="text/javascript">
+				var app = new Vue({
+					el: '#app03',
+					data: {
+						newTodo: '',
+						todos:[]
+					},
+					methods: {
+						addNewTodo: function () {
+							if(this.newTodo){
+								this.todos.push({text:this.newTodo});
+								this.newTodo = '';
+							}
+						},
+						deleteTodo: function(index){
+							this.todos.splice(index,1);
+						}
+					}
+				});
+			</script>
+		</div>
+
+		<div class="section">
+			<h1>template|filter</h1>
+			<template id="inputComponent">
+				<div>
+					<input type="text" v-model="newTodo">
+					<button @click="operate">{{operation}}</button>
+					<button v-if="operationAttach" @click="operateAttach">{{operationAttach}}</button>
+				</div>
+			</template>
+			<template id="olComponent">
+				<ol>
+					<li v-for="(todo,index) in sortedTodos">
+						{{ todo.text | toUpperCase }}
+						<button @click="deleteTodo(index)">X</button>
+					</li>
+				</ol>
+			</template>
+			<div id="app04">
+				<input-con operation="Add" @operation="addNewTodo"></input-con>
+				<ol-con :todos="todos" @delete="deleteTodo"></ol-con>
+			</div>
+			<script type="text/javascript">
+				Vue.filter('toUpperCase',function(value){
+					if(value){
+						return value.toUpperCase();
+					}
+				});
+				Vue.component("input-con",{
+					template:"#inputComponent",
+					props:{operation:String,
+						operationAttach:String},
+						data:function(){
+							return {newTodo:''};
+						},
+						methods:{
+							operate:function(){
+								this.$emit('operation', this.newTodo);
+								this.newTodo = '';
+							},
+							operateAttach:function(){
+								if(this.newTodo){
+									this.$emit('operation-attach', this.newTodo);
+									this.newTodo = '';
+								}
+							}
+						}
+					});
+				Vue.component("ol-con",{
+					template:"#olComponent",
+					props:{"todos":Array,
+					"query":String},
+					methods:{
+						deleteTodo:function(index){
+							this.$emit('delete', index);				
+						}
+					},
+					computed:{
+						sortedTodos:function(){
+							var result = [];
+							var key = this.query? this.query.toUpperCase() : '';
+							if(key){
+								this.todos.forEach(function(item){
+									if(item.text.indexOf(key) != -1){
+										result.push(item);
+									}
+								});
+							}
+							else{
+								result = this.todos || [];
+							}
+							if(result){
+								return result.sort(function(a,b){
+									return a.text.localeCompare(b.text);
+								});
+							}
+						}
+					}
+				});
+				var app = new Vue({
+					el: '#app04',
+					data: {
+						todos: [
+						{ text: 'Learn JavaScript' },
+						{ text: 'Learn Vue' },
+						{ text: 'Build something awesome' }
+						]
+					},
+					methods: {
+						addNewTodo: function (data) {
+							if(data){
+								this.todos.push({text:data});
+							}
+						},
+						deleteTodo: function(index){
+							this.todos.splice(index,1);
+						}
+					}
+				});
+			</script>
+		</div>
+
+		<div class="section">
+			<h1>计算属性</h1>
+			<div id="app05">
+				<span>FirstName</span>
+				<input v-model="firstName">
+				<span>LastName</span>
+				<input v-model="lastName">
+				<p>FullName: {{ fullName }}</p>
+			</div>
+			<script type="text/javascript">
+				var app = new Vue({
+					el: '#app05',
+					data: {
+						firstName:'',
+						lastName:''
+					},
+					computed:{
+						fullName:function(){
+							return this.firstName + ' ' + this.lastName;
+						}
+					}
+				});
+			</script>
+		</div>
+
+		<div class="section">
+			<h1>OrderBy|Search</h1>
+			<div id="app06">
+				<input-con operation-attach="Add" operation="Search"  @operation-attach="addNewTodo" @operation="Search"></input-con>
+				<ol-con :todos="todos" :query="queryKey" @delete="deleteTodo"></ol-con>
+			</div>
+			<script type="text/javascript">
+				var app = new Vue({
+					el: '#app06',
+					data: {
+						queryKey: "",
+						todos: [
+						{ text: 'Learn JavaScript' },
+						{ text: 'qearn Vue' },
+						{ text: 'Build something awesome' }
+						]
+					},
+					methods: {
+						Search: function (data) {
+							this.queryKey = data;
+						},
+						deleteTodo: function(index){
+							this.todos.splice(index,1);
+						},
+						addNewTodo: function(data){
+							this.todos.push({text:data});
+							this.queryKey = '';
+						}
+					}
+				});
+			</script>
+		</div>
+
+		<div class="section">
+			<h1>Form|Decorate</h1>
+			<div id="app07">
+				<input type="checkbox" id="jack" value="Jack" v-model="checkedNames">
+				<label for="jack">Jack</label>
+				<input type="checkbox" id="john" value="Jim" v-model="checkedNames">
+				<label >John</label>
+				<input type="checkbox" id="mike" v-model="checkedNames">
+				<label for="mike">Mike</label>
+				<br>
+				<span>Checked names: {{ checkedNames }}(对应input的value,for使得input的作用范围覆盖到span)</span>
+				<br>
+				<input type="radio" id="one" value="One" v-model="picked">
+				<label for="one">One</label>
+				<br>
+				<input type="radio" id="two" value="Two" v-model="picked">
+				<label for="two">Two</label>
+				<br>
+				<span>Picked: {{ picked }}</span>
+				<br>
+				<select v-model="selected">
+					<option>A</option>
+					<option>B</option>
+					<option>C</option>
+				</select>
+				<span>Selected: {{ selected }} 可设置初始值</span>
+				<br>
+				<input v-model.lazy.number.trim="msg" >
+				<span>msg: {{ msg }} 可叠加</span>
+			</div>
+			<script type="text/javascript">
+				var app = new Vue({
+					el: '#app07',
+					data: {
+						checkedNames: ['Jim'],
+						picked: 'One',
+						selected:'A',
+						msg:''
+					}
+				});
+			</script>
+		</div>
+		<div class="section">
+			<h1>Slot|MessageBox</h1>
+			<template id="applayout">
+				<div class="container">
+					<header>
+						<slot name="header"></slot>
+					</header>
+					<main>
+						<slot></slot>
+					</main>
+					<footer>
+						<slot name="footer"></slot>
+					</footer>
+				</div>
+			</template>
+			<div id="app08">
+				<app-layout>
+					<component :is="headerCon" slot="header" operation-attach="Add" operation="Search"  @operation-attach="addNewTodo" @operation="Search"></component>
+					<component :is="footerCon" slot="footer" :todos="todos" :query="queryKey" @delete="deleteTodo"></component>
+					<p>Main Content 只替换了组件，没替换绑定的属性 添加v-once 则组件被缓存，不替换</p>
+					<button @click="swapComponent">Swap Header Footer</button>
+				</app-layout>
+			</div>
+			<script type="text/javascript">
+				Vue.component("app-layout", {
+					template: "#applayout"
+				});
+				var app = new Vue({
+					el: '#app08',
+					data: {
+						headerCon: "input-con",
+						footerCon: "ol-con",
+						queryKey:"",
+						todos: [
+						{ text: 'Learn JavaScript' },
+						{ text: 'qearn Vue' },
+						{ text: 'Build something awesome' }
+						]
+					},
+					methods: {
+						Search: function (data) {
+							this.queryKey = data;
+						},
+						deleteTodo: function(index){
+							this.todos.splice(index,1);
+						},
+						addNewTodo: function(data){
+							this.todos.push({text:data});
+							this.queryKey = '';
+						},
+						swapComponent: function(){
+							var temp = this.headerCon;
+							this.headerCon = this.footerCon;
+							this.footerCon = temp;
+						}
+					}
+				});
+			</script>
+		</div>
+
+	</div>
+</body>
+</html>
